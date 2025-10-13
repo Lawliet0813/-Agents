@@ -1,0 +1,1 @@
+SpeechRecognition>=3.10.0; platform_system=="Darwin"

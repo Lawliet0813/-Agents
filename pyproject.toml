@@ -1,0 +1,16 @@
+[project]
+name = "mac-agents"
+version = "0.1.0"
+description = "Automation agents for macOS daily workflows"
+authors = [{name = "Automation Team"}]
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+voice = ["SpeechRecognition>=3.10.0"]
+
+dynamic = ["readme"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
