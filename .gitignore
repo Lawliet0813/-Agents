@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.venv/
+reports/
+Daily_File_Summary_*.md
+Expense_Report_*.html
+Expense_Report_*.csv
