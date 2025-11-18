@@ -5,3 +5,10 @@ reports/
 Daily_File_Summary_*.md
 Expense_Report_*.html
 Expense_Report_*.csv
+
+# Graduate Agent
+.env
+graduate_agent/config/config.yaml
+graduate_agent/data/
+moodle_courses.json
+*.log
