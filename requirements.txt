@@ -5,3 +5,6 @@ SpeechRecognition>=3.10.0; platform_system=="Darwin"
 selenium>=4.15.0
 pyyaml>=6.0.1
 notion-client>=2.2.1
+
+# Web Application dependencies
+streamlit>=1.28.0

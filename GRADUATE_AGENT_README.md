@@ -9,8 +9,55 @@
 - ✅ 自動下載課程資源（PDF、PPT、Word 等）
 - ✅ 按課程和週次組織檔案結構
 - ✅ 同步課程資料到 Notion（可選）
+- 🌐 **提供圖形化 Web 介面**（新增！）
 
-## 🚀 快速開始
+## 🎯 使用方式
+
+本系統提供兩種使用方式：
+
+### 🌐 方式 1: Web 圖形介面（推薦）
+
+**適合：** 日常使用、視覺化操作、初學者
+
+```bash
+# 一鍵啟動 Web 應用
+./run_webapp.sh          # Linux/Mac
+# 或
+run_webapp.bat          # Windows
+
+# 瀏覽器將自動開啟 http://localhost:8501
+```
+
+**特色：**
+- 🎨 直觀的圖形化介面
+- 📊 即時進度顯示
+- 🔄 互動式操作
+- 📈 統計資訊視覺化
+- 💡 無需記憶指令
+
+👉 **詳細說明請參考：[Web UI 使用指南](WEBAPP_GUIDE.md)**
+
+### 💻 方式 2: 命令列介面（CLI）
+
+**適合：** 自動化任務、腳本整合、進階用戶
+
+```bash
+# 爬取課程資料
+python -m graduate_agent.main scrape
+
+# 下載課程資源
+python -m graduate_agent.main download
+
+# 同步到 Notion
+python -m graduate_agent.main sync --parent-page-id <ID>
+
+# 執行完整流程
+python -m graduate_agent.main full
+```
+
+---
+
+## 🚀 快速開始（CLI 方式）
 
 ### 1. 安裝依賴
 
