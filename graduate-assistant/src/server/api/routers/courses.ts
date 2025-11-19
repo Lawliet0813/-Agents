@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '~/server/api/trpc'
+import { syncService } from '~/server/services/sync-service'
 
 export const coursesRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
@@ -100,16 +101,31 @@ export const coursesRouter = createTRPCRouter({
       z.object({
         username: z.string(),
         password: z.string(),
+        baseUrl: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // This will call the Python service to scrape Moodle
-      // For now, return a placeholder
-      // Implementation will be in Task 4.2
+      // Call sync service to fetch data from Moodle and save to database
+      const result = await syncService.performFullSync(ctx.session.user.id, {
+        username: input.username,
+        password: input.password,
+        baseUrl: input.baseUrl,
+      })
+
       return {
-        success: true,
-        message: 'Sync endpoint ready - Python service integration pending',
-        coursesCount: 0,
+        success: result.success,
+        message: result.message,
+        coursesCreated: result.coursesCreated,
+        coursesUpdated: result.coursesUpdated,
+        assignmentsCreated: result.assignmentsCreated,
+        assignmentsUpdated: result.assignmentsUpdated,
+        errors: result.errors,
       }
+    }),
+
+  syncLogs: protectedProcedure
+    .input(z.object({ limit: z.number().optional().default(10) }))
+    .query(async ({ ctx, input }) => {
+      return syncService.getSyncLogs(ctx.session.user.id, input.limit)
     }),
 })
