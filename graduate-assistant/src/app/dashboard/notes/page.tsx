@@ -25,6 +25,13 @@ export default function VoiceNotesPage() {
     },
   })
 
+  // Transcribe mutation
+  const transcribeMutation = trpc.notes.transcribe.useMutation({
+    onSuccess: () => {
+      utils.notes.list.invalidate()
+    },
+  })
+
   // Filter and search
   type VoiceNote = NonNullable<typeof voiceNotes>[number]
   const filteredNotes = useMemo(() => {
@@ -76,6 +83,15 @@ export default function VoiceNotesPage() {
   const handleDelete = async (id: string) => {
     if (confirm('確定要刪除此語音筆記嗎？')) {
       await deleteMutation.mutateAsync({ id })
+    }
+  }
+
+  const handleTranscribe = async (id: string) => {
+    try {
+      await transcribeMutation.mutateAsync({ id, language: 'zh' })
+    } catch (error) {
+      console.error('Transcription error:', error)
+      alert('轉錄失敗，請檢查是否已設定 OpenAI API Key')
     }
   }
 
@@ -266,23 +282,50 @@ export default function VoiceNotesPage() {
                         </div>
                       )}
                       <div className="flex items-center gap-2 pt-2 border-t">
-                        <Button variant="ghost" size="sm" className="flex-1 text-xs">
-                          <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                          </svg>
-                          播放
-                        </Button>
+                        {!note.transcript ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleTranscribe(note.id)}
+                            disabled={transcribeMutation.isPending}
+                            className="flex-1 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          >
+                            {transcribeMutation.isPending ? (
+                              <>
+                                <svg className="w-3 h-3 mr-1 animate-spin" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                轉錄中...
+                              </>
+                            ) : (
+                              <>
+                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                                </svg>
+                                AI 轉錄
+                              </>
+                            )}
+                          </Button>
+                        ) : (
+                          <Button variant="ghost" size="sm" className="flex-1 text-xs">
+                            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                            播放
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"

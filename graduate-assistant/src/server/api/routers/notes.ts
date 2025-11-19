@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '~/server/api/trpc'
+import { transcribeBase64Audio } from '~/server/services/whisper-service'
 
 export const notesRouter = createTRPCRouter({
   list: protectedProcedure
@@ -89,5 +90,59 @@ export const notesRouter = createTRPCRouter({
           userId: ctx.session.user.id,
         },
       })
+    }),
+
+  transcribe: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        language: z.enum(['zh', 'en', 'auto']).optional().default('zh'),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Get the voice note
+      const note = await ctx.db.voiceNote.findFirst({
+        where: {
+          id: input.id,
+          userId: ctx.session.user.id,
+        },
+      })
+
+      if (!note) {
+        throw new Error('語音筆記不存在')
+      }
+
+      if (!note.originalFilePath) {
+        throw new Error('音頻檔案不存在')
+      }
+
+      if (note.transcript) {
+        // Already transcribed, return existing
+        return { transcript: note.transcript, alreadyTranscribed: true }
+      }
+
+      // Transcribe using Whisper
+      const result = await transcribeBase64Audio(note.originalFilePath, {
+        language: input.language,
+      })
+
+      // Update the note with transcript
+      const updatedNote = await ctx.db.voiceNote.update({
+        where: {
+          id: input.id,
+          userId: ctx.session.user.id,
+        },
+        data: {
+          transcript: result.text,
+          processedAt: new Date(),
+        },
+      })
+
+      return {
+        transcript: result.text,
+        duration: result.duration,
+        language: result.language,
+        alreadyTranscribed: false,
+      }
     }),
 })
