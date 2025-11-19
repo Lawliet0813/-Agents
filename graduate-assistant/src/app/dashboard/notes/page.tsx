@@ -5,11 +5,13 @@ import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
+import { VoiceRecorder } from '~/components/voice-recorder'
 import { trpc } from '~/lib/trpc/client'
 
 export default function VoiceNotesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [courseFilter, setCourseFilter] = useState<string>('all')
+  const [showRecorder, setShowRecorder] = useState(false)
 
   // Fetch data
   const { data: voiceNotes, isLoading } = trpc.notes.list.useQuery()
@@ -85,7 +87,7 @@ export default function VoiceNotesPage() {
           <h1 className="text-2xl font-bold text-gray-900">語音筆記</h1>
           <p className="text-gray-600 mt-1">管理您的課程錄音和筆記</p>
         </div>
-        <Button>
+        <Button onClick={() => setShowRecorder(true)}>
           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
           </svg>
@@ -333,6 +335,16 @@ export default function VoiceNotesPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Voice Recorder Dialog */}
+      <VoiceRecorder
+        open={showRecorder}
+        onClose={() => setShowRecorder(false)}
+        onSuccess={() => {
+          setShowRecorder(false)
+          utils.notes.list.invalidate()
+        }}
+      />
     </div>
   )
 }
