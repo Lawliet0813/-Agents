@@ -6,12 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/com
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { VoiceRecorder } from '~/components/voice-recorder'
+import { AudioPlayer } from '~/components/audio-player'
 import { trpc } from '~/lib/trpc/client'
 
 export default function VoiceNotesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [courseFilter, setCourseFilter] = useState<string>('all')
   const [showRecorder, setShowRecorder] = useState(false)
+  const [playingNote, setPlayingNote] = useState<{ id: string; title: string; audioUrl: string; transcript: string | null } | null>(null)
 
   // Fetch data
   const { data: voiceNotes, isLoading } = trpc.notes.list.useQuery()
@@ -308,7 +310,19 @@ export default function VoiceNotesPage() {
                             )}
                           </Button>
                         ) : (
-                          <Button variant="ghost" size="sm" className="flex-1 text-xs">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              setPlayingNote({
+                                id: note.id,
+                                title: note.course?.name || '未分類筆記',
+                                audioUrl: note.originalFilePath,
+                                transcript: note.transcript,
+                              })
+                            }
+                            className="flex-1 text-xs"
+                          >
                             <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path
                                 strokeLinecap="round"
@@ -388,6 +402,17 @@ export default function VoiceNotesPage() {
           utils.notes.list.invalidate()
         }}
       />
+
+      {/* Audio Player Dialog */}
+      {playingNote && (
+        <AudioPlayer
+          open={!!playingNote}
+          onClose={() => setPlayingNote(null)}
+          audioUrl={playingNote.audioUrl}
+          title={playingNote.title}
+          transcript={playingNote.transcript}
+        />
+      )}
     </div>
   )
 }
