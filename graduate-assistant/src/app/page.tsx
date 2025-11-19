@@ -1,5 +1,6 @@
 'use client'
 
+import Link from "next/link"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
 import { trpc } from "~/lib/trpc/client"
@@ -13,6 +14,18 @@ export default function Home() {
         <div className="text-center">
           <h1 className="text-4xl font-bold mb-2">研究生智能助理</h1>
           <p className="text-gray-600">Graduate Assistant - 專案初始化完成！</p>
+
+          <div className="mt-6 flex justify-center gap-4">
+            {sessionQuery.data?.user ? (
+              <Link href="/dashboard">
+                <Button size="lg">前往 Dashboard</Button>
+              </Link>
+            ) : (
+              <Link href="/login">
+                <Button size="lg">登入開始使用</Button>
+              </Link>
+            )}
+          </div>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -161,7 +174,8 @@ export default function Home() {
           <p className="text-green-600 font-semibold">✓ Task 1.1: Next.js 專案初始化</p>
           <p className="text-green-600 font-semibold">✓ Task 1.2: Prisma 資料庫設置</p>
           <p className="text-green-600 font-semibold">✓ Task 1.3: tRPC 設定完成</p>
-          <p className="mt-4">下一步：Task 2.1 NextAuth.js 設定與登入頁面</p>
+          <p className="text-green-600 font-semibold">✓ Task 2.1: NextAuth.js 認證系統</p>
+          <p className="mt-4">下一步：Task 2.2 Dashboard 基礎架構</p>
         </div>
       </div>
     </div>
