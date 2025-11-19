@@ -1,8 +1,8 @@
-"""
-Moodle API Client for Next.js
-
-This client communicates with the Python FastAPI Moodle service.
-"""
+/**
+ * Moodle API Client for Next.js
+ *
+ * This client communicates with the Python FastAPI Moodle service.
+ */
 
 export interface MoodleCredentials {
   username: string

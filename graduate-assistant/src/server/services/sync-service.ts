@@ -1,9 +1,9 @@
-"""
-Sync Service
-
-Handles synchronization between Moodle service and database.
-Transforms Moodle API data to Prisma schema format.
-"""
+/**
+ * Sync Service
+ *
+ * Handles synchronization between Moodle service and database.
+ * Transforms Moodle API data to Prisma schema format.
+ */
 
 import { db } from '~/server/db'
 import { moodleClient, type MoodleSyncResponse } from '~/lib/moodle-client'

@@ -8,6 +8,7 @@ import { trpc } from '~/lib/trpc/client'
 
 export default function CoursesPage() {
   const { data: courses, isLoading } = trpc.courses.list.useQuery()
+  type Course = NonNullable<typeof courses>[number]
 
   return (
     <div className="p-6 space-y-6">
@@ -33,7 +34,7 @@ export default function CoursesPage() {
         </Card>
       ) : courses && courses.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {courses.map((course) => (
+          {courses.map((course: Course) => (
             <Card key={course.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="text-lg">{course.name}</CardTitle>
