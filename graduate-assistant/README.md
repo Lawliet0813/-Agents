@@ -64,6 +64,46 @@ npm run dev
 
 ---
 
+## 📱 像 APP 一樣啟動（推薦！）
+
+不想每次都打開終端機？現在可以**雙擊啟動**，就像使用普通應用程式一樣！
+
+### 🍎 macOS 使用者
+
+**首次使用 - 創建 App**：
+```bash
+./create-macos-app.sh
+```
+
+然後就可以：
+- ✅ 雙擊 `Graduate Assistant.app` 啟動
+- ✅ 雙擊 `Stop Graduate Assistant.app` 停止
+- ✅ 拖到 Dock 或應用程式資料夾
+
+### 🪟 Windows 使用者
+
+直接雙擊啟動：
+- ✅ 雙擊 `GraduateAssistant.vbs` 啟動（無命令行視窗）
+- ✅ 雙擊 `StopGraduateAssistant.vbs` 停止
+- ✅ 可建立桌面捷徑或釘選到工作列
+
+### 🎛️ 控制面板（所有平台）
+
+```bash
+npm run app
+```
+
+提供互動式選單：
+- **[1]** 啟動所有服務
+- **[2]** 停止所有服務
+- **[3]** 重啟所有服務
+- **[4]** 查看服務狀態
+- **[5]** 查看日誌
+
+**詳細說明**：請參考 [APP_LAUNCHER_GUIDE.md](./APP_LAUNCHER_GUIDE.md)
+
+---
+
 ## 📧 郵件自動化設定（政大學生專用）
 
 ### 🎯 一鍵啟動（推薦！）
@@ -169,12 +209,17 @@ graduate-assistant/
 │   └── services/              # 前端服務
 │       └── mail2000-watcher/  # 郵件監控
 ├── scripts/                   # 工具腳本
+│   ├── app-launcher.ts        # 🆕 APP 控制面板
 │   ├── process-mail2000.ts
 │   └── start-mail2000-watcher.ts
 ├── prisma/                    # 資料庫 Schema
 ├── public/                    # 靜態資源
-├── start-mail-watcher.sh      # 一鍵啟動 (macOS/Linux)
-├── start-mail-watcher.bat     # 一鍵啟動 (Windows)
+├── ecosystem.config.js        # 🆕 PM2 配置
+├── GraduateAssistant.vbs      # 🆕 Windows 啟動器
+├── StopGraduateAssistant.vbs  # 🆕 Windows 停止器
+├── create-macos-app.sh        # 🆕 macOS App 創建腳本
+├── start-mail-watcher.sh      # 郵件監控啟動 (macOS/Linux)
+├── start-mail-watcher.bat     # 郵件監控啟動 (Windows)
 └── ...
 ```
 
@@ -191,6 +236,7 @@ graduate-assistant/
 
 ## 📝 文件
 
+- **[APP 啟動指南](./APP_LAUNCHER_GUIDE.md)** - 🆕 像 APP 一樣雙擊啟動
 - [Mail2000 設定指南](./NCCU_MAIL2000_SETUP.md) - 政大 Mail2000 郵件整合
 - [Google Workspace 設定](./NCCU_EMAIL_SETUP.md) - Gmail API 整合
 - [快速開始指南](./NCCU_QUICK_START.md) - 5 分鐘上手

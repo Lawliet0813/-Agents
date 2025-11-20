@@ -15,7 +15,13 @@
     "init-nccu-email": "tsx scripts/init-nccu-email.ts",
     "process-nccu-emails": "tsx scripts/process-nccu-emails.ts",
     "process-mail2000": "tsx scripts/process-mail2000.ts",
-    "start-mail2000-watcher": "tsx scripts/start-mail2000-watcher.ts"
+    "start-mail2000-watcher": "tsx scripts/start-mail2000-watcher.ts",
+    "app": "tsx scripts/app-launcher.ts",
+    "app:start": "tsx scripts/app-launcher.ts start",
+    "app:stop": "tsx scripts/app-launcher.ts stop",
+    "app:restart": "tsx scripts/app-launcher.ts restart",
+    "app:status": "tsx scripts/app-launcher.ts status",
+    "app:logs": "tsx scripts/app-launcher.ts logs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.70.0",
