@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '~/server/api/trpc'
 import { transcribeBase64Audio } from '~/server/services/whisper-service'
+import { summarizeNote } from '~/server/services/ai-service'
 
 export const notesRouter = createTRPCRouter({
   list: protectedProcedure
@@ -143,6 +144,86 @@ export const notesRouter = createTRPCRouter({
         duration: result.duration,
         language: result.language,
         alreadyTranscribed: false,
+      }
+    }),
+
+  summarize: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        includeKeyPoints: z.boolean().optional().default(true),
+        includeQuestions: z.boolean().optional().default(false),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Get the voice note
+      const note = await ctx.db.voiceNote.findFirst({
+        where: {
+          id: input.id,
+          userId: ctx.session.user.id,
+        },
+        include: {
+          course: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      })
+
+      if (!note) {
+        throw new Error('語音筆記不存在')
+      }
+
+      if (!note.transcript) {
+        throw new Error('請先轉錄語音筆記才能生成摘要')
+      }
+
+      if (note.processedNotes) {
+        // Already summarized, return existing
+        return {
+          summary: note.processedNotes,
+          alreadySummarized: true,
+        }
+      }
+
+      // Generate summary using Claude
+      const result = await summarizeNote(note.transcript, {
+        courseName: note.course?.name,
+        includeKeyPoints: input.includeKeyPoints,
+        includeQuestions: input.includeQuestions,
+        language: 'zh',
+      })
+
+      // Format the summary with key points and questions
+      let formattedSummary = result.summary
+
+      if (result.keyPoints && result.keyPoints.length > 0) {
+        formattedSummary += '\n\n【關鍵點】\n'
+        formattedSummary += result.keyPoints.map(point => `• ${point}`).join('\n')
+      }
+
+      if (result.questions && result.questions.length > 0) {
+        formattedSummary += '\n\n【複習問題】\n'
+        formattedSummary += result.questions.map((q, i) => `${i + 1}. ${q}`).join('\n')
+      }
+
+      // Update the note with summary
+      await ctx.db.voiceNote.update({
+        where: {
+          id: input.id,
+          userId: ctx.session.user.id,
+        },
+        data: {
+          processedNotes: formattedSummary,
+          processedAt: new Date(),
+        },
+      })
+
+      return {
+        summary: formattedSummary,
+        suggestedTitle: result.suggestedTitle,
+        alreadySummarized: false,
       }
     }),
 })

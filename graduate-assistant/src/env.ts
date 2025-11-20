@@ -10,6 +10,7 @@ const server = z.object({
   NEXTAUTH_SECRET: z.string(),
   NEXTAUTH_URL: z.string().url().optional(),
   OPENAI_API_KEY: z.string().optional(), // Optional for development
+  ANTHROPIC_API_KEY: z.string().optional(), // Optional for development
 })
 
 /**
@@ -30,6 +31,7 @@ const processEnv = {
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
   NEXTAUTH_URL: process.env.NEXTAUTH_URL,
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+  ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
 }
 
 // Don't touch the part below

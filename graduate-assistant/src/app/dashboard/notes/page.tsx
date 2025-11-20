@@ -34,6 +34,13 @@ export default function VoiceNotesPage() {
     },
   })
 
+  // Summarize mutation
+  const summarizeMutation = trpc.notes.summarize.useMutation({
+    onSuccess: () => {
+      utils.notes.list.invalidate()
+    },
+  })
+
   // Filter and search
   type VoiceNote = NonNullable<typeof voiceNotes>[number]
   const filteredNotes = useMemo(() => {
@@ -94,6 +101,19 @@ export default function VoiceNotesPage() {
     } catch (error) {
       console.error('Transcription error:', error)
       alert('轉錄失敗，請檢查是否已設定 OpenAI API Key')
+    }
+  }
+
+  const handleSummarize = async (id: string) => {
+    try {
+      await summarizeMutation.mutateAsync({
+        id,
+        includeKeyPoints: true,
+        includeQuestions: false,
+      })
+    } catch (error) {
+      console.error('Summarization error:', error)
+      alert('生成摘要失敗，請檢查是否已設定 Anthropic API Key')
     }
   }
 
@@ -310,35 +330,63 @@ export default function VoiceNotesPage() {
                             )}
                           </Button>
                         ) : (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              setPlayingNote({
-                                id: note.id,
-                                title: note.course?.name || '未分類筆記',
-                                audioUrl: note.originalFilePath,
-                                transcript: note.transcript,
-                              })
-                            }
-                            className="flex-1 text-xs"
-                          >
-                            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                              />
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                            播放
-                          </Button>
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                setPlayingNote({
+                                  id: note.id,
+                                  title: note.course?.name || '未分類筆記',
+                                  audioUrl: note.originalFilePath,
+                                  transcript: note.transcript,
+                                })
+                              }
+                              className="text-xs"
+                            >
+                              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                                />
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                              </svg>
+                              播放
+                            </Button>
+                            {!note.processedNotes && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleSummarize(note.id)}
+                                disabled={summarizeMutation.isPending}
+                                className="text-xs text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                              >
+                                {summarizeMutation.isPending ? (
+                                  <>
+                                    <svg className="w-3 h-3 mr-1 animate-spin" fill="none" viewBox="0 0 24 24">
+                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                    </svg>
+                                    生成中...
+                                  </>
+                                ) : (
+                                  <>
+                                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                    </svg>
+                                    生成摘要
+                                  </>
+                                )}
+                              </Button>
+                            )}
+                          </>
                         )}
                         <Button
                           variant="ghost"
