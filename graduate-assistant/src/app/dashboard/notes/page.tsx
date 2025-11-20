@@ -142,7 +142,7 @@ export default function VoiceNotesPage() {
           <p className="text-gray-600 mt-1">管理您的課程錄音和筆記</p>
         </div>
         <div className="flex gap-2">
-          {voiceNotes?.filter((n) => n.status === 'NEEDS_REVIEW').length > 0 && (
+          {voiceNotes?.filter((n: any) => n.status === 'NEEDS_REVIEW').length > 0 && (
             <Link href="/dashboard/notes/pending">
               <Button variant="outline">
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -150,7 +150,7 @@ export default function VoiceNotesPage() {
                 </svg>
                 待確認
                 <Badge variant="destructive" className="ml-2">
-                  {voiceNotes?.filter((n) => n.status === 'NEEDS_REVIEW').length}
+                  {voiceNotes?.filter((n: any) => n.status === 'NEEDS_REVIEW').length}
                 </Badge>
               </Button>
             </Link>
@@ -193,7 +193,7 @@ export default function VoiceNotesPage() {
               <div>
                 <p className="text-sm text-gray-600">iCloud</p>
                 <p className="text-2xl font-bold">
-                  {voiceNotes?.filter((n) => n.source === 'ICLOUD').length || 0}
+                  {voiceNotes?.filter((n: any) => n.source === 'ICLOUD').length || 0}
                 </p>
               </div>
             </div>
@@ -211,7 +211,7 @@ export default function VoiceNotesPage() {
               <div>
                 <p className="text-sm text-gray-600">Web 錄音</p>
                 <p className="text-2xl font-bold">
-                  {voiceNotes?.filter((n) => n.source === 'WEB').length || 0}
+                  {voiceNotes?.filter((n: any) => n.source === 'WEB').length || 0}
                 </p>
               </div>
             </div>
@@ -229,7 +229,7 @@ export default function VoiceNotesPage() {
               <div>
                 <p className="text-sm text-gray-600">已完成</p>
                 <p className="text-2xl font-bold">
-                  {voiceNotes?.filter((n) => n.status === 'COMPLETED').length || 0}
+                  {voiceNotes?.filter((n: any) => n.status === 'COMPLETED').length || 0}
                 </p>
               </div>
             </div>
@@ -247,7 +247,7 @@ export default function VoiceNotesPage() {
               <div>
                 <p className="text-sm text-gray-600">待確認</p>
                 <p className="text-2xl font-bold">
-                  {voiceNotes?.filter((n) => n.status === 'NEEDS_REVIEW').length || 0}
+                  {voiceNotes?.filter((n: any) => n.status === 'NEEDS_REVIEW').length || 0}
                 </p>
               </div>
             </div>
@@ -297,7 +297,7 @@ export default function VoiceNotesPage() {
                 >
                   <option value="all">所有課程</option>
                   <option value="none">未分類</option>
-                  {courses?.map((course) => (
+                  {courses?.map((course: any) => (
                     <option key={course.id} value={course.id}>
                       {course.name}
                     </option>

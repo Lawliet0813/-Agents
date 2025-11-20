@@ -73,12 +73,14 @@ export async function summarizeNote(
  */
 function buildSummaryPrompt(
   transcript: string,
-  options: Required<NoteSummaryOptions>
+  options: Omit<Required<NoteSummaryOptions>, 'courseName'> & Pick<NoteSummaryOptions, 'courseName'>
 ): string {
   const { courseName, includeKeyPoints, includeQuestions, language } = options
 
+  let prompt = ''
+
   if (language === 'zh') {
-    let prompt = `請幫我分析以下${courseName ? `「${courseName}」課程的` : ''}筆記內容：\n\n${transcript}\n\n`
+    prompt = `請幫我分析以下${courseName ? `「${courseName}」課程的` : ''}筆記內容：\n\n${transcript}\n\n`
     prompt += '請提供：\n'
     prompt += '1. 摘要：簡潔的內容摘要（2-3 句話）\n'
 
@@ -102,7 +104,7 @@ function buildSummaryPrompt(
       prompt += '\n【複習問題】\n1. ...\n2. ...\n'
     }
   } else {
-    let prompt = `Please analyze the following${courseName ? ` notes from "${courseName}" course` : ' notes'}:\n\n${transcript}\n\n`
+    prompt = `Please analyze the following${courseName ? ` notes from "${courseName}" course` : ' notes'}:\n\n${transcript}\n\n`
     prompt += 'Please provide:\n'
     prompt += '1. Summary: A concise summary (2-3 sentences)\n'
 

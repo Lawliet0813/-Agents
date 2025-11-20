@@ -23,7 +23,7 @@ export default function DashboardPage() {
   type Assignment = NonNullable<typeof allAssignments>[number]
   const totalCourses = courses?.length || 0
   const pendingAssignments = allAssignments?.filter((a: Assignment) => a.status !== 'completed').length || 0
-  const totalVoiceNotes = courses?.reduce((sum, course) => sum + (course._count?.voiceNotes || 0), 0) || 0
+  const totalVoiceNotes = courses?.reduce((sum: number, course: any) => sum + (course._count?.voiceNotes || 0), 0) || 0
 
   // Calculate days until due
   const getDaysUntilDue = (dueDate: Date) => {
@@ -132,7 +132,7 @@ export default function DashboardPage() {
         <CardContent>
           {upcomingAssignments && upcomingAssignments.length > 0 ? (
             <div className="space-y-3">
-              {upcomingAssignments.slice(0, 5).map((assignment) => {
+              {upcomingAssignments.slice(0, 5).map((assignment: any) => {
                 const daysUntilDue = getDaysUntilDue(assignment.dueDate)
                 const isUrgent = daysUntilDue <= 3
 
@@ -196,7 +196,7 @@ export default function DashboardPage() {
         <CardContent>
           {syncLogs && syncLogs.length > 0 ? (
             <div className="space-y-4">
-              {syncLogs.map((log) => (
+              {syncLogs.map((log: any) => (
                 <div key={log.id} className="flex items-start gap-3 pb-4 border-b last:border-0 last:pb-0">
                   <div
                     className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${

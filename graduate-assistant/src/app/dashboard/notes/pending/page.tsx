@@ -33,7 +33,7 @@ export default function PendingNotesPage() {
   })
 
   // Filter only NEEDS_REVIEW notes
-  const pendingNotes = voiceNotes?.filter((note) => note.status === 'NEEDS_REVIEW') || []
+  const pendingNotes = voiceNotes?.filter((note: any) => note.status === 'NEEDS_REVIEW') || []
 
   const handleAssignCourse = async (noteId: string, courseId: string) => {
     if (!courseId) return
@@ -116,7 +116,7 @@ export default function PendingNotesPage() {
         </Card>
       ) : pendingNotes.length > 0 ? (
         <div className="space-y-4">
-          {pendingNotes.map((note) => {
+          {pendingNotes.map((note: any) => {
             const suggestedCourses = note.suggestedCourses
               ? JSON.parse(note.suggestedCourses)
               : []
@@ -203,7 +203,7 @@ export default function PendingNotesPage() {
                         className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="">選擇課程...</option>
-                        {courses?.map((course) => (
+                        {courses?.map((course: any) => (
                           <option key={course.id} value={course.id}>
                             {course.name}
                           </option>

@@ -289,7 +289,7 @@ export function VoiceRecorder({ open, onClose, onSuccess }: VoiceRecorderProps) 
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
             >
               <option value="">未分類</option>
-              {courses?.map((course) => (
+              {courses?.map((course: any) => (
                 <option key={course.id} value={course.id}>
                   {course.name}
                 </option>

@@ -57,8 +57,8 @@ export default function CalendarPage() {
     })) || []
 
     const assignmentEvents = assignments
-      ?.filter((a) => a.dueDate >= dateRange.start && a.dueDate <= dateRange.end)
-      .map((a) => ({
+      ?.filter((a: any) => a.dueDate >= dateRange.start && a.dueDate <= dateRange.end)
+      .map((a: any) => ({
         id: a.id,
         title: a.title,
         start: a.dueDate,

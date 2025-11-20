@@ -188,7 +188,7 @@ export class GmailService {
    * Create assignment from email
    */
   private async createAssignmentFromEmail(message: any, category: string) {
-    const subject = message.payload?.headers?.find((h) => h.name === 'Subject')?.value || '未命名作業'
+    const subject = message.payload?.headers?.find((h: any) => h.name === 'Subject')?.value || '未命名作業'
     const body = this.extractBody(message)
 
     // Try to extract due date from email (basic implementation)

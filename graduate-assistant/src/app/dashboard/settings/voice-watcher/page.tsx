@@ -20,23 +20,23 @@ export default function VoiceWatcherDashboard() {
   const { data: voiceNotes } = trpc.notes.list.useQuery()
 
   // Filter iCloud notes
-  const iCloudNotes = voiceNotes?.filter((n) => n.source === 'ICLOUD') || []
+  const iCloudNotes = voiceNotes?.filter((n: any) => n.source === 'ICLOUD') || []
 
   // Today's notes
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  const todayNotes = iCloudNotes.filter((n) => new Date(n.createdAt) >= today)
+  const todayNotes = iCloudNotes.filter((n: any) => new Date(n.createdAt) >= today)
 
   // Statistics
   const totalProcessed = iCloudNotes.length
   const todayProcessed = todayNotes.length
-  const completedCount = iCloudNotes.filter((n) => n.status === 'COMPLETED').length
-  const needsReviewCount = iCloudNotes.filter((n) => n.status === 'NEEDS_REVIEW').length
-  const failedCount = iCloudNotes.filter((n) => n.status === 'FAILED').length
+  const completedCount = iCloudNotes.filter((n: any) => n.status === 'COMPLETED').length
+  const needsReviewCount = iCloudNotes.filter((n: any) => n.status === 'NEEDS_REVIEW').length
+  const failedCount = iCloudNotes.filter((n: any) => n.status === 'FAILED').length
 
   // Recent notes (last 10)
   const recentNotes = [...iCloudNotes]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 10)
 
   return (
@@ -122,19 +122,19 @@ export default function VoiceWatcherDashboard() {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-600">成功完成</span>
                 <span className="font-medium text-green-600">
-                  {todayNotes.filter((n) => n.status === 'COMPLETED').length}
+                  {todayNotes.filter((n: any) => n.status === 'COMPLETED').length}
                 </span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-600">待確認</span>
                 <span className="font-medium text-amber-600">
-                  {todayNotes.filter((n) => n.status === 'NEEDS_REVIEW').length}
+                  {todayNotes.filter((n: any) => n.status === 'NEEDS_REVIEW').length}
                 </span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-600">處理失敗</span>
                 <span className="font-medium text-red-600">
-                  {todayNotes.filter((n) => n.status === 'FAILED').length}
+                  {todayNotes.filter((n: any) => n.status === 'FAILED').length}
                 </span>
               </div>
             </div>
