@@ -1,0 +1,293 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// NextAuth.js Models
+// ============================================
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ============================================
+// User Model
+// ============================================
+
+model User {
+  id                 String    @id @default(uuid())
+  email              String    @unique
+  emailVerified      DateTime?
+  name               String?
+  image              String?
+  moodleUsername     String?
+  moodlePassword     String?   // 加密儲存
+  notionToken        String?
+  googleRefreshToken String?
+
+  // NextAuth relations
+  accounts           Account[]
+  sessions           Session[]
+
+  // App relations
+  courses            Course[]
+  voiceNotes         VoiceNote[]
+  assignments        Assignment[]
+  learningActivities LearningActivity[]
+  emailRules         EmailRule[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+// ============================================
+// Course Models
+// ============================================
+
+model Course {
+  id             String    @id @default(uuid())
+  userId         String
+  moodleCourseId String
+  name           String
+  semester       String?
+  instructor     String?
+  notionPageId   String?
+  lastSyncedAt   DateTime?
+
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contents CourseContent[]
+  voiceNotes VoiceNote[]
+  assignments Assignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, moodleCourseId])
+  @@index([userId])
+  @@map("courses")
+}
+
+model CourseContent {
+  id            String    @id @default(uuid())
+  courseId      String
+  weekNumber    Int?
+  sectionName   String?
+  contentType   String    // lecture/assignment/resource
+  title         String
+  description   String?   @db.Text
+  dueDate       DateTime?
+  url           String?
+  filePath      String?
+  notionBlockId String?
+
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  assignments Assignment[]
+
+  createdAt DateTime @default(now())
+
+  @@index([courseId])
+  @@index([courseId, weekNumber])
+  @@map("course_contents")
+}
+
+// ============================================
+// Voice Note Model
+// ============================================
+
+model VoiceNote {
+  id               String    @id @default(uuid())
+  userId           String
+  courseId         String?
+
+  // File information
+  originalFilePath String                          // File path or base64 data
+  fileName         String?                         // Original filename
+  fileSize         Int?                            // File size in bytes
+  duration         Int?                            // Duration in seconds
+  source           VoiceNoteSource @default(WEB)   // web or icloud
+
+  // Content
+  transcript       String?   @db.Text              // Transcription text
+  processedNotes   String?   @db.Text              // AI-generated notes
+  summary          String?   @db.Text              // Brief summary
+  keyPoints        String?   @db.Text              // JSON array of key points
+
+  // Processing status
+  status           VoiceNoteStatus @default(PENDING)
+  errorMessage     String?   @db.Text              // Error message if failed
+
+  // Course identification (for iCloud auto-detection)
+  identificationMethod   String?                   // time/filename/content/manual
+  identificationConfidence Float?                  // 0-100
+  suggestedCourses String?   @db.Text              // JSON array of suggested courses
+
+  // Sync
+  notionPageId     String?
+
+  // Timestamps
+  recordedAt       DateTime
+  processedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([courseId])
+  @@index([status])
+  @@index([source])
+  @@map("voice_notes")
+}
+
+enum VoiceNoteSource {
+  WEB     // Recorded via web interface
+  ICLOUD  // Auto-imported from iCloud
+}
+
+enum VoiceNoteStatus {
+  PENDING     // Waiting to be processed
+  PROCESSING  // Currently being processed
+  COMPLETED   // Successfully processed
+  FAILED      // Processing failed
+  NEEDS_REVIEW // Needs manual course selection
+}
+
+// ============================================
+// Assignment Model
+// ============================================
+
+model Assignment {
+  id              String    @id @default(uuid())
+  courseContentId String?
+  userId          String
+  courseId        String
+  title           String
+  description     String?   @db.Text
+  dueDate         DateTime
+  status          String    @default("pending") // pending/in_progress/submitted/completed
+  calendarEventId String?
+  notionPageId    String?
+  reminderSent    Boolean   @default(false)
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course        Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseContent CourseContent? @relation(fields: [courseContentId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([courseId])
+  @@index([dueDate])
+  @@map("assignments")
+}
+
+// ============================================
+// Learning Activity Model
+// ============================================
+
+model LearningActivity {
+  id              String  @id @default(uuid())
+  userId          String
+  activityType    String  // download/view/note/assignment
+  courseId        String?
+  contentId       String?
+  durationMinutes Int?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([userId, createdAt])
+  @@map("learning_activities")
+}
+
+// ============================================
+// Sync Log Model
+// ============================================
+
+model SyncLog {
+  id             String    @id @default(uuid())
+  userId         String
+  syncType       String    // moodle/calendar/notion/email
+  status         String    // success/failed/partial
+  itemsProcessed Int       @default(0)
+  errorMessage   String?   @db.Text
+  startedAt      DateTime
+  completedAt    DateTime?
+
+  @@index([userId])
+  @@index([userId, syncType])
+  @@map("sync_logs")
+}
+
+// ============================================
+// Email Rule Model
+// ============================================
+
+model EmailRule {
+  id       String  @id @default(uuid())
+  userId   String
+  keyword  String
+  category String
+  action   String  // create_task/add_to_calendar/notify
+  priority Int     @default(0)
+  isActive Boolean @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("email_rules")
+}
