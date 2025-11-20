@@ -69,6 +69,59 @@ npm run process-mail2000
 
 ---
 
+## 🎯 一鍵啟動自動監控（推薦！）
+
+不想每次都手動執行指令？我們提供了**一鍵啟動腳本**，讓系統自動監控並處理新郵件！
+
+### 方式 1: 使用一鍵啟動腳本（最簡單）
+
+#### macOS / Linux:
+```bash
+./start-mail-watcher.sh
+```
+
+#### Windows:
+雙擊 `start-mail-watcher.bat` 或在命令提示字元執行：
+```cmd
+start-mail-watcher.bat
+```
+
+**腳本會自動：**
+- ✅ 檢查 Node.js 和 npm
+- ✅ 安裝依賴（如果需要）
+- ✅ 詢問您的 Email
+- ✅ 詢問檢查間隔（預設 5 分鐘）
+- ✅ 啟動自動監控服務
+
+**啟動後：**
+- 💻 系統會每 N 分鐘自動檢查新郵件
+- 📧 自動處理 Moodle 相關郵件
+- 📝 自動建立作業到系統
+- ⌨️  按 **Enter** 可手動觸發檢查
+- ⌨️  按 **Ctrl+C** 停止服務
+
+### 方式 2: 使用 npm 指令
+
+```bash
+# 使用預設設定 (每 5 分鐘檢查)
+npm run start-mail2000-watcher your@email.com
+
+# 或設定環境變數
+export NCCU_EMAIL="114921039@nccu.edu.tw"
+export MAIL_CHECK_INTERVAL=3  # 每 3 分鐘檢查
+npm run start-mail2000-watcher
+```
+
+### 方式 3: 手動執行（只執行一次）
+
+如果您只想手動執行一次檢查：
+
+```bash
+npm run process-mail2000
+```
+
+---
+
 ## 🔧 詳細設定步驟
 
 ### 1. 環境變數設定
