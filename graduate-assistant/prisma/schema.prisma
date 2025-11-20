@@ -146,21 +146,59 @@ model VoiceNote {
   id               String    @id @default(uuid())
   userId           String
   courseId         String?
-  originalFilePath String
-  transcript       String?   @db.Text
-  processedNotes   String?   @db.Text
+
+  // File information
+  originalFilePath String                          // File path or base64 data
+  fileName         String?                         // Original filename
+  fileSize         Int?                            // File size in bytes
+  duration         Int?                            // Duration in seconds
+  source           VoiceNoteSource @default(WEB)   // web or icloud
+
+  // Content
+  transcript       String?   @db.Text              // Transcription text
+  processedNotes   String?   @db.Text              // AI-generated notes
+  summary          String?   @db.Text              // Brief summary
+  keyPoints        String?   @db.Text              // JSON array of key points
+
+  // Processing status
+  status           VoiceNoteStatus @default(PENDING)
+  errorMessage     String?   @db.Text              // Error message if failed
+
+  // Course identification (for iCloud auto-detection)
+  identificationMethod   String?                   // time/filename/content/manual
+  identificationConfidence Float?                  // 0-100
+  suggestedCourses String?   @db.Text              // JSON array of suggested courses
+
+  // Sync
   notionPageId     String?
+
+  // Timestamps
   recordedAt       DateTime
   processedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
 
-  createdAt DateTime @default(now())
-
   @@index([userId])
   @@index([courseId])
+  @@index([status])
+  @@index([source])
   @@map("voice_notes")
+}
+
+enum VoiceNoteSource {
+  WEB     // Recorded via web interface
+  ICLOUD  // Auto-imported from iCloud
+}
+
+enum VoiceNoteStatus {
+  PENDING     // Waiting to be processed
+  PROCESSING  // Currently being processed
+  COMPLETED   // Successfully processed
+  FAILED      // Processing failed
+  NEEDS_REVIEW // Needs manual course selection
 }
 
 // ============================================
