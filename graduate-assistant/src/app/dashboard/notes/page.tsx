@@ -9,9 +9,14 @@ import { VoiceRecorder } from '~/components/voice-recorder'
 import { AudioPlayer } from '~/components/audio-player'
 import { trpc } from '~/lib/trpc/client'
 
+type VoiceNoteSource = 'WEB' | 'ICLOUD'
+type VoiceNoteStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'NEEDS_REVIEW'
+
 export default function VoiceNotesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [courseFilter, setCourseFilter] = useState<string>('all')
+  const [sourceFilter, setSourceFilter] = useState<string>('all')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
   const [showRecorder, setShowRecorder] = useState(false)
   const [playingNote, setPlayingNote] = useState<{ id: string; title: string; audioUrl: string; transcript: string | null } | null>(null)
 
@@ -55,18 +60,29 @@ export default function VoiceNotesPage() {
       )
     }
 
+    // Filter by source
+    if (sourceFilter !== 'all') {
+      filtered = filtered.filter((note: VoiceNote) => note.source === sourceFilter)
+    }
+
+    // Filter by status
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter((note: VoiceNote) => note.status === statusFilter)
+    }
+
     // Search
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
       filtered = filtered.filter((note: VoiceNote) =>
         note.transcript?.toLowerCase().includes(query) ||
         note.processedNotes?.toLowerCase().includes(query) ||
-        note.course?.name?.toLowerCase().includes(query)
+        note.course?.name?.toLowerCase().includes(query) ||
+        note.fileName?.toLowerCase().includes(query)
       )
     }
 
     return filtered
-  }, [voiceNotes, courseFilter, searchQuery])
+  }, [voiceNotes, courseFilter, sourceFilter, statusFilter, searchQuery])
 
   // Group by date
   const groupedNotes = useMemo(() => {
@@ -125,16 +141,31 @@ export default function VoiceNotesPage() {
           <h1 className="text-2xl font-bold text-gray-900">語音筆記</h1>
           <p className="text-gray-600 mt-1">管理您的課程錄音和筆記</p>
         </div>
-        <Button onClick={() => setShowRecorder(true)}>
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-          </svg>
-          新增語音筆記
-        </Button>
+        <div className="flex gap-2">
+          {voiceNotes?.filter((n) => n.status === 'NEEDS_REVIEW').length > 0 && (
+            <Link href="/dashboard/notes/pending">
+              <Button variant="outline">
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                待確認
+                <Badge variant="destructive" className="ml-2">
+                  {voiceNotes?.filter((n) => n.status === 'NEEDS_REVIEW').length}
+                </Badge>
+              </Button>
+            </Link>
+          )}
+          <Button onClick={() => setShowRecorder(true)}>
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+            </svg>
+            新增語音筆記
+          </Button>
+        </div>
       </div>
 
       {/* Statistics */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -154,15 +185,15 @@ export default function VoiceNotesPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
               </div>
               <div>
-                <p className="text-sm text-gray-600">已轉錄</p>
+                <p className="text-sm text-gray-600">iCloud</p>
                 <p className="text-2xl font-bold">
-                  {voiceNotes?.filter((n) => n.transcript).length || 0}
+                  {voiceNotes?.filter((n) => n.source === 'ICLOUD').length || 0}
                 </p>
               </div>
             </div>
@@ -172,15 +203,51 @@ export default function VoiceNotesPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              <div className="p-2 bg-indigo-100 rounded-lg">
+                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                 </svg>
               </div>
               <div>
-                <p className="text-sm text-gray-600">關聯課程</p>
+                <p className="text-sm text-gray-600">Web 錄音</p>
                 <p className="text-2xl font-bold">
-                  {new Set(voiceNotes?.filter((n) => n.courseId).map((n) => n.courseId)).size || 0}
+                  {voiceNotes?.filter((n) => n.source === 'WEB').length || 0}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">已完成</p>
+                <p className="text-2xl font-bold">
+                  {voiceNotes?.filter((n) => n.status === 'COMPLETED').length || 0}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-100 rounded-lg">
+                <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">待確認</p>
+                <p className="text-2xl font-bold">
+                  {voiceNotes?.filter((n) => n.status === 'NEEDS_REVIEW').length || 0}
                 </p>
               </div>
             </div>
@@ -191,9 +258,9 @@ export default function VoiceNotesPage() {
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="space-y-4">
             {/* Search */}
-            <div className="flex-1">
+            <div className="w-full">
               <div className="relative">
                 <svg
                   className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
@@ -218,21 +285,56 @@ export default function VoiceNotesPage() {
               </div>
             </div>
 
-            {/* Course Filter */}
-            <div className="md:w-64">
-              <select
-                value={courseFilter}
-                onChange={(e) => setCourseFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="all">所有課程</option>
-                <option value="none">未分類</option>
-                {courses?.map((course) => (
-                  <option key={course.id} value={course.id}>
-                    {course.name}
-                  </option>
-                ))}
-              </select>
+            {/* Filter Dropdowns */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Course Filter */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">課程</label>
+                <select
+                  value={courseFilter}
+                  onChange={(e) => setCourseFilter(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">所有課程</option>
+                  <option value="none">未分類</option>
+                  {courses?.map((course) => (
+                    <option key={course.id} value={course.id}>
+                      {course.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Source Filter */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">來源</label>
+                <select
+                  value={sourceFilter}
+                  onChange={(e) => setSourceFilter(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">全部來源</option>
+                  <option value="WEB">Web 錄音</option>
+                  <option value="ICLOUD">iCloud 同步</option>
+                </select>
+              </div>
+
+              {/* Status Filter */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">狀態</label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">全部狀態</option>
+                  <option value="PENDING">待處理</option>
+                  <option value="PROCESSING">處理中</option>
+                  <option value="COMPLETED">已完成</option>
+                  <option value="FAILED">失敗</option>
+                  <option value="NEEDS_REVIEW">待確認</option>
+                </select>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -276,21 +378,56 @@ export default function VoiceNotesPage() {
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <CardTitle className="text-base line-clamp-1">
-                            {note.course?.name || '未分類筆記'}
-                          </CardTitle>
-                          <CardDescription className="text-xs">
+                          <div className="flex items-center gap-2 mb-1">
+                            <CardTitle className="text-base line-clamp-1">
+                              {note.course?.name || '未分類筆記'}
+                            </CardTitle>
+                          </div>
+                          <CardDescription className="text-xs flex items-center gap-2">
                             {new Date(note.recordedAt).toLocaleTimeString('zh-TW', {
                               hour: '2-digit',
                               minute: '2-digit',
                             })}
+                            {note.fileName && (
+                              <span className="text-xs text-gray-400">• {note.fileName}</span>
+                            )}
                           </CardDescription>
                         </div>
-                        {note.transcript && (
-                          <Badge variant="secondary" className="text-xs">
-                            已轉錄
+                        <div className="flex flex-col gap-1 items-end">
+                          {/* Source Badge */}
+                          <Badge
+                            variant={note.source === 'ICLOUD' ? 'default' : 'secondary'}
+                            className="text-xs whitespace-nowrap"
+                          >
+                            {note.source === 'ICLOUD' ? '📱 iCloud' : '🌐 Web'}
                           </Badge>
-                        )}
+                          {/* Status Badge */}
+                          {note.status === 'COMPLETED' && (
+                            <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-300">
+                              ✓ 完成
+                            </Badge>
+                          )}
+                          {note.status === 'PENDING' && (
+                            <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-300">
+                              ⏳ 待處理
+                            </Badge>
+                          )}
+                          {note.status === 'PROCESSING' && (
+                            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-300">
+                              ⚙️ 處理中
+                            </Badge>
+                          )}
+                          {note.status === 'FAILED' && (
+                            <Badge variant="outline" className="text-xs bg-red-50 text-red-700 border-red-300">
+                              ✗ 失敗
+                            </Badge>
+                          )}
+                          {note.status === 'NEEDS_REVIEW' && (
+                            <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 border-amber-300">
+                              ⚠️ 待確認
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-3">

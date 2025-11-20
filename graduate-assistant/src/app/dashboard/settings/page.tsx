@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
@@ -49,6 +50,58 @@ export default function SettingsPage() {
         </TabsContent>
 
         <TabsContent value="integrations" className="mt-6 space-y-4">
+          {/* iCloud Voice Watcher Service */}
+          <Card className="border-blue-200 bg-blue-50">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    iCloud 語音監控服務
+                  </CardTitle>
+                  <CardDescription>自動處理 iPhone 錄音並生成筆記</CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-xs text-green-700 font-medium">運行中</span>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <p className="text-sm text-gray-700">
+                  系統正在監控 iCloud Voice Memos 目錄，當偵測到新的 iPhone 錄音時會自動：
+                </p>
+                <ul className="text-sm text-gray-600 space-y-1 ml-4">
+                  <li>• 提取 iOS 內建逐字稿</li>
+                  <li>• 智能識別所屬課程</li>
+                  <li>• 使用 Claude AI 生成結構化筆記</li>
+                  <li>• 發送 macOS 系統通知</li>
+                </ul>
+                <div className="flex gap-2 pt-2">
+                  <Link href="/dashboard/settings/voice-watcher">
+                    <Button variant="default">
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                      查看監控儀表板
+                    </Button>
+                  </Link>
+                  <Link href="/dashboard/notes/pending">
+                    <Button variant="outline">
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      待確認筆記
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Moodle Integration */}
           <Card>
             <CardHeader>
