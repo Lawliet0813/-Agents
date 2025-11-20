@@ -71,6 +71,10 @@ model User {
   notionToken        String?
   googleRefreshToken String?
 
+  // Mail2000 credentials
+  mail2000Username   String?
+  mail2000Password   String?   // 加密儲存
+
   // NextAuth relations
   accounts           Account[]
   sessions           Session[]

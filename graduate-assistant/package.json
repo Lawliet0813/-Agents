@@ -13,7 +13,8 @@
     "db:studio": "prisma studio",
     "postinstall": "prisma generate",
     "init-nccu-email": "tsx scripts/init-nccu-email.ts",
-    "process-nccu-emails": "tsx scripts/process-nccu-emails.ts"
+    "process-nccu-emails": "tsx scripts/process-nccu-emails.ts",
+    "process-mail2000": "tsx scripts/process-mail2000.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.70.0",
