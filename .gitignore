@@ -6,6 +6,10 @@ Daily_File_Summary_*.md
 Expense_Report_*.html
 Expense_Report_*.csv
 
+# Node.js (root level only - not graduate-assistant/)
+/node_modules/
+/package-lock.json
+
 # Graduate Agent
 .env
 graduate_agent/config/config.yaml
